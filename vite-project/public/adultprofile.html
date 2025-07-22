@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adult's Profile</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e0f7f9;
+      color: #000;
+    }
+
+    .header {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+    }
+
+    .profile-container {
+      background-color: #fff;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+
+    .btn {
+      background-color: #00cccc;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #0099cc;
+    }
+
+    .footer {
+      background-color: #b2edee;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+    }
+
+    .footer-item {
+      cursor: pointer;
+    }
+
+    .floating-btn {
+      background-color: #00cccc;
+      border: none;
+      border-radius: 50%;
+      padding: 15px;
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Adult's Profile</h1>
+    <p id="fullName">Loading...</p>
+    <button id="updateProfile" class="btn">Update Profile</button>
+    <img id="profileImage" src="assets/addadult.png" alt="Profile Image" style="width: 120px; height: 150px;">
+  </div>
+
+  <!-- Profile Info Section -->
+  <div class="profile-container">
+    <div class="info-row">
+      <span>Full Name</span><span id="fullNameInfo">Nil</span>
+    </div>
+    <div class="info-row">
+      <span>Date of Birth</span><span id="dobInfo">Nil</span>
+    </div>
+    <div class="info-row">
+      <span>Blood Group</span><span id="bloodGroupInfo">Nil</span>
+    </div>
+    <div class="info-row">
+      <span>Gender</span><span id="genderInfo">Nil</span>
+    </div>
+    <div class="info-row">
+      <span>Medical Condition</span><span id="medicalConditionInfo">Nil</span>
+    </div>
+    <div class="info-row">
+      <span>Address</span><span id="addressInfo">Nil</span>
+    </div>
+  </div>
+
+  <!-- Buttons Section -->
+  <div class="button-container">
+    <button class="btn" id="medicalHistory">Medical History</button>
+    <button class="btn" id="carePlan">Care Plan</button>
+  </div>
+
+  <!-- Floating Action Button -->
+  <button class="floating-btn" onclick="handleAdd()">
+    <span class="material-icons">add</span>
+  </button>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-item" onclick="goHome()">Home</div>
+    <div class="footer-item" onclick="goReminder()">Reminder</div>
+    <div class="footer-item" onclick="goProfile()">Profile</div>
+  </div>
+
+  <!-- Firebase Configuration -->
+  <script src="firebase_options.js"></script>
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: 'AIzaSyDZCa4Z9BuDG7bsWRlOiV12FREFJd5zphc',
+      appId: '1:618462469952:web:fb3f4984b6b5703c2424a5',
+      messagingSenderId: '618462469952',
+      projectId: 'vacmed-fa567',
+      authDomain: 'vacmed-fa567.firebaseapp.com',
+      storageBucket: 'vacmed-fa567.firebasestorage.app',
+      measurementId: 'G-Z2EDFF7YP7',
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // Get current user id
+    const userId = auth.currentUser ? auth.currentUser.uid : null;
+
+    // Fetch adult data from Firestore
+    async function fetchAdultData() {
+      if (!userId) {
+        alert("User not logged in!");
+        return;
+      }
+
+      try {
+        const docRef = db.collection('adults').where('userId', '==', userId).limit(1);
+        const querySnapshot = await docRef.get();
+        if (!querySnapshot.empty) {
+          const doc = querySnapshot.docs[0];
+          const adultData = doc.data();
+
+          // Set the profile information
+          document.getElementById('fullName').textContent = adultData.fullName || 'Nil';
+          document.getElementById('fullNameInfo').textContent = adultData.fullName || 'Nil';
+          document.getElementById('dobInfo').textContent = adultData.dob || 'Nil';
+          document.getElementById('bloodGroupInfo').textContent = adultData.bloodGroup || 'Nil';
+          document.getElementById('genderInfo').textContent = adultData.gender || 'Nil';
+          document.getElementById('medicalConditionInfo').textContent = adultData.primaryDiagnosis || 'Nil';
+          document.getElementById('addressInfo').textContent = adultData.homeAddress || 'Nil';
+          // Display profile image if available
+          document.getElementById('profileImage').src = adultData.profileImage || 'assets/addadult.png';
+        } else {
+          alert('No records found for this user.');
+        }
+      } catch (e) {
+        alert('Error fetching adult data: ' + e);
+      }
+    }
+
+    // Call fetch data function on page load
+    window.onload = function () {
+      fetchAdultData();
+    }
+
+    // Navigation handlers
+    function goHome() {
+      window.location.href = '/homeScreen';
+    }
+
+    function goReminder() {
+      window.location.href = '/reminder';
+    }
+
+    function goProfile() {
+      window.location.href = '/adultProfileScreen';
+    }
+
+    // Update Profile handler
+    document.getElementById('updateProfile').addEventListener('click', function () {
+      window.location.href = '/addAdult';
+    });
+
+    // Button action handlers
+    document.getElementById('medicalHistory').addEventListener('click', function () {
+      window.location.href = '/medicalHistory';
+    });
+
+    document.getElementById('carePlan').addEventListener('click', function () {
+      window.location.href = '/carePlan';
+    });
+
+    // Floating button action
+    function handleAdd() {
+      alert('Add action');
+    }
+  </script>
+
+</body>
+
+</html>

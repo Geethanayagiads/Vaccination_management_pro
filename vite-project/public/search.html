@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Paramedical Professional</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #84d3df, #D7EFDB);
+            color: #fff;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 10px;
+            background: #84d3df;
+        }
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input[type="text"], select {
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            background-color: #255e67;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #499995;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .loading {
+            margin-top: 20px;
+            font-style: italic;
+        }
+        .error {
+            color: red;
+        }
+        .result-card {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .result-card:hover {
+            background-color: #A5CFCD;
+        }
+        
+        .profile-picture {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 10px;
+        }
+        
+        .profile-picture img {
+            width: 100%;
+            height: auto;
+        }
+        
+        .profile-info h2 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        
+        .profile-info p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Find Paramedical Professional</h1>
+        <form class="search-form" id="searchForm">
+            <input type="text" id="city" placeholder="Enter City" required>
+            <input type="text" id="specialization" placeholder="Enter Specialization (e.g., Orthopedic)" required>
+            <button type="submit">Search</button>
+        </form>
+        <div class="results" id="results"></div>
+        <div class="loading" id="loading" style="display:none;">Loading...</div>
+        <div class="error" id="error" style="display:none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const city = document.getElementById('city').value;
+    const specialization = document.getElementById('specialization').value;
+    const resultsDiv = document.getElementById('results');
+    const loadingDiv = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+
+    // Clear previous results and error messages
+    resultsDiv.innerHTML = '';
+    errorDiv.style.display = 'none';
+
+    loadingDiv.style.display = 'block'; // Show loading message
+
+    try {
+        const response = await fetch('http://localhost:3000/api/search-paramedical', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ city, specialization })
+        });
+
+        // Check if response is OK
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const results = await response.json();
+
+        loadingDiv.style.display = 'none'; // Hide loading message
+
+        if (results.length === 0) {
+            resultsDiv.innerHTML = '<p>No professionals found.</p>';
+        } else {
+            let resultHTML = '';
+            results.forEach(prof => {
+                resultHTML += `
+                    <div class="result-card" onclick="window.location.href='details.html?email=${encodeURIComponent(prof.email)}'">
+                        <div class="profile-picture">
+                            <img src="src/assets/profile.jpg" alt="${prof.full_name}" />
+                        </div>
+                        <div class="profile-info">
+                            <h2>${prof.full_name}</h2>
+                            <p>${prof.specialization}</p>
+                            <p>${prof.city}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            resultsDiv.innerHTML = resultHTML;
+        }
+
+    } catch (error) {
+        loadingDiv.style.display = 'none'; // Hide loading message
+        errorDiv.style.display = 'block';
+        errorDiv.innerHTML = `Error fetching results: ${error.message}`;
+    }
+});
+
+
+    </script>
+</body>
+</html>

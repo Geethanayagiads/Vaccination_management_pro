@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Child Record</title>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
+
+  <!-- Your Firebase Configuration -->
+  <script type="module" src="firebase_options.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+    h2 {
+      text-align: center;
+    }
+    .form-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .input-field {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      background-color: #f57272;
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #e04e4e;
+    }
+    .error {
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>ADD CHILD RECORD</h2>
+
+  <div class="form-container">
+    <form id="childForm">
+      <input type="text" id="childName" class="input-field" placeholder="Child Name" required />
+      <input type="text" id="parentName" class="input-field" placeholder="Parent Name" required />
+      <input type="text" id="relationship" class="input-field" placeholder="Relationship" required />
+      <input type="date" id="dob" class="input-field" required />
+      <input type="text" id="gender" class="input-field" placeholder="Gender" required />
+      <input type="number" id="birthWeight" class="input-field" placeholder="Birth Weight (kg)" required />
+      <input type="text" id="address" class="input-field" placeholder="Address" required />
+      <!-- Add Email Field -->
+      <input type="email" id="email" class="input-field" placeholder="Email" required />
+      <button type="submit">Submit</button>
+    </form>
+    <p id="errorMessage" class="error"></p>
+  </div>
+
+  <script type="module">
+    // Import Firebase services
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js";
+    import { firebaseConfig } from "./firebase_options.js";  // Ensure this file contains correct Firebase config
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore(app);
+
+    const form = document.getElementById("childForm");
+    const errorMessage = document.getElementById("errorMessage");
+
+    // Check if user already has a child profile
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const q = query(collection(db, "children"), where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          // If the user already has a child profile, navigate to the child profile page
+          window.location.href = "childprofile.html";
+        }
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault(); // ✅ Prevents page reload
+
+        errorMessage.textContent = ""; // Clear previous error
+
+        const childName = document.getElementById("childName").value;
+        const parentName = document.getElementById("parentName").value;
+        const relationship = document.getElementById("relationship").value;
+        const dob = document.getElementById("dob").value;
+        const gender = document.getElementById("gender").value;
+        const birthWeight = parseFloat(document.getElementById("birthWeight").value);
+        const address = document.getElementById("address").value;
+        const email = document.getElementById("email").value; // Get Email Value
+
+        if (!childName || !parentName || !relationship || !dob || !gender || !birthWeight || !address || !email) {
+            errorMessage.textContent = "⚠️ Please fill all fields.";
+            return;
+        }
+
+        // Ensure user is logged in before adding record
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                errorMessage.textContent = "⚠️ User not logged in.";
+                return;
+            }
+
+            try {
+                const dobDate = new Date(dob);
+                if (isNaN(dobDate.getTime())) {
+                    errorMessage.textContent = "⚠️ Invalid date format. Use YYYY-MM-DD.";
+                    return;
+                }
+
+                // ✅ Add child data to Firestore
+                await addDoc(collection(db, "children"), {
+                    childName,
+                    parentName,
+                    relationship,
+                    dob: dobDate,
+                    gender,
+                    birthWeight,
+                    address,
+                    email, // Add Email to Firestore
+                    userId: user.uid,
+                    createdAt: new Date(),
+                });
+
+                alert("🎉 Child record added successfully!");
+                form.reset(); // ✅ Reset form fields after submission
+
+                // ✅ Navigate to the child profile page
+                window.location.href = "childprofile.html";  
+
+            } catch (error) {
+                errorMessage.textContent = `⚠️ Error adding child record: ${error.message}`;
+            }
+
+        });
+    });
+  </script>
+
+</body>
+</html>

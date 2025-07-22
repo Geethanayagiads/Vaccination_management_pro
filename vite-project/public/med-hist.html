@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Upload and Viewer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #file-input {
+      margin: 20px 0;
+    }
+    #pdf-container {
+      border: 1px solid #ddd;
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      height: 500px;
+      overflow: auto;
+    }
+    .pdf-page {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Upload and View Medical Report (PDF)</h1>
+
+  <!-- File Input for PDF -->
+  <input type="file" id="file-input" accept="application/pdf" />
+
+  <!-- Container for displaying PDF -->
+  <div id="pdf-container"></div>
+
+  <script>
+    // Get reference to the file input and container
+    const fileInput = document.getElementById("file-input");
+    const pdfContainer = document.getElementById("pdf-container");
+
+    // Event listener for file input change
+    fileInput.addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (file && file.type === "application/pdf") {
+        // Read the uploaded file
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const arrayBuffer = event.target.result;
+          // Load PDF using pdf.js
+          pdfjsLib.getDocument(arrayBuffer).promise.then(pdf => {
+            pdfContainer.innerHTML = ''; // Clear the previous content
+            renderPDF(pdf);
+          }).catch(err => {
+            console.error("Error loading PDF:", err);
+          });
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        alert("Please upload a valid PDF file.");
+      }
+    });
+
+    // Function to render PDF pages
+    function renderPDF(pdf) {
+      const totalPages = pdf.numPages;
+      for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+        // Create a new div for each page
+        const pageDiv = document.createElement("div");
+        pageDiv.className = "pdf-page";
+        pdfContainer.appendChild(pageDiv);
+
+        // Render each page
+        pdf.getPage(pageNum).then(page => {
+          const viewport = page.getViewport({ scale: 1 });
+          const canvas = document.createElement("canvas");
+          pageDiv.appendChild(canvas);
+
+          const context = canvas.getContext("2d");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+
+          page.render({
+            canvasContext: context,
+            viewport: viewport
+          }).promise.then(() => {
+            console.log("Page rendered:", pageNum);
+          });
+        });
+      }
+    }
+  </script>
+
+</body>
+</html>

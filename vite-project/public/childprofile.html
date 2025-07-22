@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Child Profile</title>
+    <script type="module" src="firebase_options.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZCa4Z9BuDG7bsWRlOiV12FREFJd5zphc",
+            authDomain: "vacmed-fa567.firebaseapp.com",
+            projectId: "vacmed-fa567",
+            storageBucket: "vacmed-fa567.firebasestorage.app",
+            messagingSenderId: "618462469952",
+            appId: "1:618462469952:web:fb3f4984b6b5703c2424a5",
+            measurementId: "G-Z2EDFF7YP7"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Function to fetch child data based on email query parameter
+        async function fetchChildData() {
+            // Get email from the URL query parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');  // Assuming email is passed as a query parameter like ?email=user@example.com
+            
+            if (!email) {
+                alert("Email not provided.");
+                return;
+            }
+
+            try {
+                // Query Firestore to find the child record by email
+                const q = query(collection(db, "children"), where("email", "==", email));
+                const querySnapshot = await getDocs(q);
+
+                // Check if there are any matching records
+                if (!querySnapshot.empty) {
+                    const data = querySnapshot.docs[0].data();
+                    document.getElementById("childName").innerText = data.childName || "Nil";
+                    document.getElementById("parentName").innerText = data.parentName || "Nil";
+                    document.getElementById("relationship").innerText = data.relationship || "Nil";
+                    document.getElementById("dob").innerText = data.dob ? data.dob.toDate().toLocaleDateString() : "Nil";
+                    document.getElementById("gender").innerText = data.gender || "Nil";
+                    document.getElementById("birthWeight").innerText = data.birthWeight || "Nil";
+                    document.getElementById("address").innerText = data.address || "Nil";
+                } else {
+                    alert("No child records found for this email.");
+                }
+            } catch (error) {
+                console.error("Error fetching child data: ", error);
+                alert("Error fetching child data.");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", fetchChildData);
+    </script>
+
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            color: #4A90E2;
+        }
+
+        /* Profile Information */
+        p {
+            font-size: 1.1rem;
+            margin: 10px 0;
+        }
+
+        strong {
+            font-weight: bold;
+            color: #333;
+        }
+
+        span {
+            font-style: italic;
+            color: #555;
+        }
+
+        #childName, #parentName, #relationship, #dob, #gender, #birthWeight, #address {
+            font-weight: normal;
+            color: #4A90E2;
+        }
+
+        /* Buttons */
+        button {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+            width: 200px;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        button:hover {
+            background-color: #357ABD;
+        }
+
+        /* Additional styling for the profile container */
+        section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        /* Styling for the form container */
+        button {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <h1>Child Profile</h1>
+        <p><strong>Child's Name:</strong> <span id="childName">Loading...</span></p>
+        <p><strong>Parent's Name:</strong> <span id="parentName">Loading...</span></p>
+        <p><strong>Relationship:</strong> <span id="relationship">Loading...</span></p>
+        <p><strong>Date of Birth:</strong> <span id="dob">Loading...</span></p>
+        <p><strong>Gender:</strong> <span id="gender">Loading...</span></p>
+        <p><strong>Birth Weight:</strong> <span id="birthWeight">Loading...</span></p>
+        <p><strong>Address:</strong> <span id="address">Loading...</span></p>
+        
+        <button onclick="window.location.href='/update-profile.html'">Update Profile</button>
+        <button onclick="window.location.href='/vacc-chart.html'">Vaccination Chart</button>
+    </section>
+</body>
+</html>

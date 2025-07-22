@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaccine Schedule</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #3498db;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+    .card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      margin: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      transition: transform 0.3s ease-in-out;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card img {
+      width: 100%;
+      height: 200px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .card .title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .card .vaccines {
+      margin-top: 10px;
+      text-align: center;
+    }
+    .card .vaccines button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      margin: 5px;
+      border-radius: 25px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .card .vaccines button:hover {
+      background-color: #2980b9;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 350px;
+      text-align: center;
+    }
+    .modal button {
+      background-color: #e64a19;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .modal button:hover {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Vaccine Schedule</h1>
+    
+  </header>
+
+  <div class="container" id="vaccineSchedule">
+    <!-- Vaccine Cards will be injected here -->
+  </div>
+
+  <!-- Modal for Vaccine Details -->
+  <div id="vaccineModal" class="modal">
+    <div class="modal-content">
+      <h2 id="vaccineTitle"></h2>
+      <p id="vaccineDetails"></p>
+      <button id="closeModalButton">Close</button>
+      <button id="bookVaccineButton">Book Vaccine</button>
+    </div>
+  </div>
+
+  <script>
+    
+    const vaccineDetails = {
+      'OPV-Zero': 'Oral Polio Vaccine protects against polio.',
+    'BCG': 'BCG protects against tuberculosis. Side effects: Soreness, fever.',
+    'Hep B (Birth dose)': 'Protects against Hepatitis B. Side effects: Redness at injection site.',
+    'OPV-1': 'Oral Polio Vaccine protects against polio. Side effects: Generally none, very rare mild fever.',
+    'RVV-1': 'Rotavirus Vaccine protects against rotavirus infection, which causes severe diarrhea. Side effects: Mild fever, irritability.',
+    'fIPV-1': 'Fractional Inactivated Polio Vaccine protects against polio. Side effects: Mild fever, redness at injection site.',
+    'Pentavalent-1': 'Pentavalent Vaccine protects against five diseases: diphtheria, pertussis, tetanus, hepatitis B, and Haemophilus influenzae type b. Side effects: Mild fever, redness at injection site.',
+    'PCV-1': 'Pneumococcal Conjugate Vaccine protects against pneumococcal diseases like pneumonia and meningitis. Side effects: Mild fever, redness at injection site.',
+    'OPV-2': 'Oral Polio Vaccine protects against polio. Side effects: Generally none, very rare mild fever.',
+    'RVV-2': 'Rotavirus Vaccine protects against rotavirus infection, which causes severe diarrhea. Side effects: Mild fever, irritability.',
+    'Pentavalent-2': 'Pentavalent Vaccine protects against five diseases: diphtheria, pertussis, tetanus, hepatitis B, and Haemophilus influenzae type b. Side effects: Mild fever, redness at injection site.',
+    'PCV-2': 'Pneumococcal Conjugate Vaccine protects against pneumococcal diseases like pneumonia and meningitis. Side effects: Mild fever, redness at injection site.',
+     'OPV-3': 'Oral Polio Vaccine protects against polio. Side effects: Generally none, very rare mild fever.',
+  'RVV-3': 'Rotavirus Vaccine protects against rotavirus infection, which causes severe diarrhea. Side effects: Mild fever, irritability.',
+  'fIPV-2': 'Fractional Inactivated Polio Vaccine protects against polio. Side effects: Mild fever, redness at injection site.',
+  'Pentavalent-3': 'Pentavalent Vaccine protects against five diseases: diphtheria, pertussis, tetanus, hepatitis B, and Haemophilus influenzae type b. Side effects: Mild fever, redness at injection site.',
+  'PCV-3': 'Pneumococcal Conjugate Vaccine protects against pneumococcal diseases like pneumonia and meningitis. Side effects: Mild fever, redness at injection site.',
+  'MR-1': 'Measles-Rubella Vaccine protects against measles and rubella. Side effects: Mild fever, rash.',
+  'fIPV-3': 'Fractional Inactivated Polio Vaccine protects against polio. Side effects: Mild fever, redness at injection site.',
+  'PCV-Booster': 'Pneumococcal Conjugate Vaccine booster protects against pneumococcal diseases. Side effects: Mild fever, redness at injection site.',
+  'JE-1': 'Japanese Encephalitis Vaccine protects against Japanese Encephalitis. Side effects: Mild fever, soreness at injection site.',
+  'OPV-Booster': 'Oral Polio Vaccine booster protects against polio. Side effects: Generally none, very rare mild fever.',
+  'MR-2': 'Measles-Rubella Vaccine protects against measles and rubella. Side effects: Mild fever, rash.',
+  'DPT-Booster-1': 'Diphtheria, Pertussis, and Tetanus Booster protects against diphtheria, pertussis, and tetanus. Side effects: Mild fever, soreness at injection site.',
+  'JE-2': 'Japanese Encephalitis Vaccine booster protects against Japanese Encephalitis. Side effects: Mild fever, soreness at injection site.',
+  'DPT-Booster-2': 'Diphtheria, Pertussis, and Tetanus Booster protects against diphtheria, pertussis, and tetanus. Side effects: Mild fever, soreness at injection site.',
+  'Td': 'Tetanus and Diphtheria Vaccine protects against tetanus and diphtheria. Side effects: Soreness at injection site, mild fever.',
+  'Td1': 'Tetanus and Diphtheria Vaccine (first dose) protects against tetanus and diphtheria. Side effects: Soreness at injection site, mild fever.',
+  'Td2': 'Tetanus and Diphtheria Vaccine (second dose) protects against tetanus and diphtheria. Side effects: Soreness at injection site, mild fever.',
+  'Td Booster': 'Tetanus and Diphtheria Booster protects against tetanus and diphtheria. Side effects: Soreness at injection site, mild fever.',
+  'Td1, Td2 or Td Booster': 'Td1, Td2, or Td Booster for pregnant women protects against tetanus and diphtheria. Side effects: Mild fever, soreness at injection site.'
+};
+
+    const nationalSchedule = [
+      { 'age': 'At Birth', 'vaccines': ['OPV-Zero', 'BCG', 'Hep B (Birth dose)'], 'image': 'https://media-public.canva.com/ibtCE/MAF-OZibtCE/1/s.png', 'color': '#CDB4DB' },
+      { 'age': '6 weeks', 'vaccines': ['OPV-1', 'RVV-1', 'fIPV-1', 'Pentavalent-1', 'PCV-1'], 'image': 'https://media-public.canva.com/MADrPCrEaSE/1/thumbnail_large.png', 'color': '#FFC8DD' },
+      { 'age': '10 weeks', 'vaccines': ['OPV-2', 'RVV-2', 'Pentavalent-2', 'PCV-2'], 'image': 'https://media-public.canva.com/pkz6Q/MAC2qXpkz6Q/2/tl.png', 'color': '#BDE0FE' },
+      { 'age': '14 weeks', 'vaccines': ['OPV-3', 'RVV-3', 'fIPV-2', 'Pentavalent-3', 'PCV-3'], 'image': 'https://i3.wp.com/static.vecteezy.com/system/resources/previews/005/205/739/original/cute-happiness-baby-cartoon-character-free-vector.jpg?ssl=1', 'color': '#FFA5AB' },
+      { 'age': '9-12 months', 'vaccines': ['MR-1', 'fIPV-3', 'PCV-Booster', 'JE-1'], 'image': 'https://media-public.canva.com/SFsMI/MAF-OqSFsMI/1/s.png', 'color': '#F5CAC3' },
+      { 'age': '16-24 months', 'vaccines': ['OPV-Booster', 'MR-2', 'DPT-Booster-1', 'JE-2'], 'image': 'https://media-public.canva.com/-2WS0/MAF-Ol-2WS0/1/s.png', 'color': '#CBEFF3' },
+      { 'age': '5-6 years', 'vaccines': ['DPT-Booster-2'], 'image': 'https://media-public.canva.com/EnuUo/MAF-OfEnuUo/1/s.png', 'color': '#A6D8D4' },
+      { 'age': '10 years', 'vaccines': ['Td'], 'image': 'https://media-public.canva.com/107Js/MAF-Oo107Js/1/s.png', 'color': '#F2D7EE' },
+      { 'age': '16 years', 'vaccines': ['Td'], 'image': 'https://media-public.canva.com/8C-_o/MAEIfT8C-_o/1/tl.png', 'color': '#EFEFD0' },
+      { 'age': 'Pregnant Women', 'vaccines': ['Td1, Td2 or Td Booster'], 'image': 'https://media-public.canva.com/vCDk0/MAFnTkvCDk0/1/tl.png', 'color': '#C4F1BE' }
+    ];
+
+// Store the vaccine schedule
+let vaccineSchedule = [];
+let vaccineBooked = false;
+
+function updateVaccineSchedule(schedule) {
+  vaccineSchedule = schedule;
+  generateVaccineCards();
+}
+    
+    function showVaccineDetails(vaccine) {
+      document.getElementById('vaccineTitle').textContent = vaccine;
+      document.getElementById('vaccineDetails').textContent = vaccineDetails[vaccine] || 'Details not available';
+      document.getElementById('vaccineModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('vaccineModal').style.display = 'none';
+    }
+
+    function bookVaccine() {
+      const date = new Date();
+      const scheduledDate = new Date(date.setDate(date.getDate() + 7));  // Schedule it for 7 days later
+      
+      vaccineBooked = true; // Set the flag to true when vaccine is booked
+      document.getElementById('viewScheduleButton').style.display = 'inline-block'; // Show the "View Schedule" button
+        }
+
+    function generateVaccineCards() {
+      const container = document.getElementById('vaccineSchedule');
+      container.innerHTML = ''; 
+      
+      nationalSchedule.forEach(schedule => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.style.backgroundColor = schedule.color;
+        card.innerHTML = `
+
+          
+        `;
+
+        const img = document.createElement('img');
+        img.src = schedule.image;
+        const title = document.createElement('div');
+        title.classList.add('title');
+        title.textContent = schedule.age;
+
+        const vaccinesList = document.createElement('div');
+        vaccinesList.classList.add('vaccines');
+        vaccinesList.innerHTML = `<strong>Vaccines:</strong><br>${schedule.vaccines.map(vaccine => `<button onclick="showVaccineDetails('${vaccine}')">${vaccine}</button>`).join('')}`;
+        
+        card.appendChild(img);
+        card.appendChild(title);
+        card.appendChild(vaccinesList);
+
+        container.appendChild(card);
+      });
+    }
+
+    document.getElementById('closeModalButton').addEventListener('click', closeModal);
+    document.getElementById('bookVaccineButton').addEventListener('click', bookVaccine);
+
+
+    function viewSchedule() {
+        if (vaccineBooked) {
+  
+  window.location.href = "vacc-schedule.html"; // Redirect to vacc-schedule.html
+} else {
+  alert('No vaccine booked yet!');
+}
+
+    }
+
+    document.getElementById('bookVaccineButton').onclick = function () {
+      window.location.href = 'app-download.html';
+    };
+    generateVaccineCards();
+  </script>
+</body>
+</html>

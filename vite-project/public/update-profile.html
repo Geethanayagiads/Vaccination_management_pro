@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Profile</title>
+    <script type="module" src="firebase_options.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZCa4Z9BuDG7bsWRlOiV12FREFJd5zphc",
+            authDomain: "vacmed-fa567.firebaseapp.com",
+            projectId: "vacmed-fa567",
+            storageBucket: "vacmed-fa567.firebasestorage.app",
+            messagingSenderId: "618462469952",
+            appId: "1:618462469952:web:fb3f4984b6b5703c2424a5",
+            measurementId: "G-Z2EDFF7YP7"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        let childDocId = "YOUR_CHILD_DOCUMENT_ID";  // Replace with actual document ID
+        
+        async function fetchChildData() {
+            try {
+                const childDocRef = doc(db, "children", childDocId);
+                const childDocSnap = await getDoc(childDocRef);
+
+                if (childDocSnap.exists()) {
+                    const data = childDocSnap.data();
+                    document.getElementById("childName").value = data.childName || "";
+                    document.getElementById("parentName").value = data.parentName || "";
+                    document.getElementById("relationship").value = data.relationship || "";
+                    document.getElementById("dob").value = data.dob?.toDate().toLocaleDateString() || "";
+                    document.getElementById("gender").value = data.gender || "";
+                    document.getElementById("birthWeight").value = data.birthWeight || "";
+                    document.getElementById("address").value = data.address || "";
+                } else {
+                    alert("No child records found.");
+                }
+            } catch (error) {
+                console.error("Error fetching child data: ", error);
+                alert("Error fetching child data.");
+            }
+        }
+
+        async function saveChanges() {
+            const updatedData = {
+                childName: document.getElementById("childName").value,
+                parentName: document.getElementById("parentName").value,
+                relationship: document.getElementById("relationship").value,
+                dob: new Date(document.getElementById("dob").value),
+                gender: document.getElementById("gender").value,
+                birthWeight: document.getElementById("birthWeight").value,
+                address: document.getElementById("address").value
+            };
+
+            try {
+                const childDocRef = doc(db, "children", childDocId);
+                await updateDoc(childDocRef, updatedData);
+                alert("Profile updated successfully!");
+            } catch (error) {
+                console.error("Error saving changes: ", error);
+                alert("Error saving changes.");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", fetchChildData);
+    </script>
+
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            color: #4A90E2;
+        }
+
+        /* Form Styling */
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #357ABD;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <h1>Update Child Profile</h1>
+        <form id="updateForm">
+            <label for="childName">Child's Name:</label>
+            <input type="text" id="childName" placeholder="Enter child's name">
+            
+            <label for="parentName">Parent's Name:</label>
+            <input type="text" id="parentName" placeholder="Enter parent's name">
+            
+            <label for="relationship">Relationship:</label>
+            <input type="text" id="relationship" placeholder="Enter relationship">
+            
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob">
+            
+            <label for="gender">Gender:</label>
+            <input type="text" id="gender" placeholder="Enter gender">
+            
+            <label for="birthWeight">Birth Weight:</label>
+            <input type="text" id="birthWeight" placeholder="Enter birth weight">
+            
+            <label for="address">Address:</label>
+            <input type="text" id="address" placeholder="Enter address">
+            
+            <button type="button" onclick="saveChanges()">Save Changes</button>
+        </form>
+    </section>
+</body>
+</html>

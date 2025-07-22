@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaccination Schedule</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #3498db;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .schedule-container {
+      margin: 20px;
+      padding: 20px;
+    }
+    .schedule-card {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .schedule-card h3 {
+      color: #333;
+    }
+    .schedule-card p {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Your Vaccine Schedule</h1>
+  </header>
+
+  <div class="schedule-container" id="vaccinationSchedule">
+    <!-- Vaccination Schedule Cards will be injected here -->
+  </div>
+
+  <script>
+    // Load the booked vaccines from local storage
+    window.onload = function() {
+      const bookedVaccines = JSON.parse(localStorage.getItem('bookedVaccines')) || [];
+
+      const scheduleContainer = document.getElementById('vaccinationSchedule');
+      
+      if (bookedVaccines.length > 0) {
+        bookedVaccines.forEach(vaccine => {
+          const vaccineCard = document.createElement('div');
+          vaccineCard.classList.add('schedule-card');
+          
+          vaccineCard.innerHTML = `
+            <h3>${vaccine.name}</h3>
+            <p>Scheduled for: ${vaccine.scheduledDate}</p>
+          `;
+          
+          scheduleContainer.appendChild(vaccineCard);
+        });
+      } else {
+        scheduleContainer.innerHTML = '<p>No vaccines booked yet.</p>';
+      }
+    };
+  </script>
+
+</body>
+</html>
