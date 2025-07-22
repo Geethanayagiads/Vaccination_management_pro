@@ -5,8 +5,8 @@ import { getAuth } from "firebase/auth";
 import "./Register.css"; // Assuming you have some styles for this
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDZCa4Z9BuDG7bsWRlOiV12FREFJd5zphc",
-  appId: "1:618462469952:web:fb3f4984b6b5703c2424a5",
+  apiKey: "",
+  appId: "",
   messagingSenderId: "618462469952",
   projectId: "vacmed-fa567",
   authDomain: "vacmed-fa567.firebaseapp.com",
